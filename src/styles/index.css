@@ -1,0 +1,570 @@
+/* CLUBROD Stylesheet - Editable Source import */
+@import '/assets/index-lYfuH_xj.css';
+
+/* Layout Grid for Car Detail Page */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+  align-items: start;
+  margin-top: 16px;
+}
+
+@media (max-width: 992px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detail-left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detail-right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Gallery & Hero Box */
+.detail-gallery .main-photo {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.hero-selected-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  z-index: 2;
+}
+
+/* Car Header Card (Title & Price Split) */
+.car-header-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 20px 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  border: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.car-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.brand-sublabel {
+  font-size: 13px;
+  font-weight: 800;
+  color: #1e293b;
+  letter-spacing: 0.2px;
+}
+
+.car-main-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.car-specs-subtitle {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+.car-header-right {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.car-main-price {
+  font-size: 30px;
+  font-weight: 800;
+  color: #f97316;
+  line-height: 1;
+}
+
+.car-monthly-price {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-top: 4px;
+}
+
+/* Description Card */
+.car-desc-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 20px 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  border: 1px solid #f1f5f9;
+}
+
+.desc-sublabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: #f97316;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.desc-text {
+  font-size: 14px;
+  color: #475569;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Trust Badges Row */
+.trust-chips-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.trust-chip {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Bottom Feature Cards Grid */
+.bottom-cards-row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .bottom-cards-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.doc-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 16px 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  border: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.doc-card-sublabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+.doc-status-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pdf-tag {
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.doc-none-text {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.doc-link {
+  font-size: 12px;
+  color: #f97316;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* Coupon Special Offer Card */
+.coupon-card {
+  background: #fffbf7;
+  border: 1.5px solid #f97316;
+  border-radius: 20px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.coupon-top-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.coupon-icon-box {
+  width: 40px;
+  height: 40px;
+  background: #f97316;
+  color: #ffffff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.coupon-text-group {
+  flex: 1;
+}
+
+.coupon-sublabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: #f97316;
+  display: block;
+}
+
+.coupon-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 2px 0;
+}
+
+.coupon-desc {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}
+
+.coupon-cta-btn {
+  background: #f97316;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s;
+}
+
+.coupon-cta-btn:hover {
+  background: #ea580c;
+}
+
+.coupon-disclaimer {
+  font-size: 10px;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* Lead Card Box on Right Side */
+.lead-card-box {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
+  border: 1px solid #f1f5f9;
+  margin-top: 0;
+}
+
+.action-tabs-bar {
+  display: flex;
+  background: #edf2f7;
+  padding: 4px;
+  border-radius: 12px;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.action-tabs-bar .tab-btn {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-tabs-bar .tab-btn.active {
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  font-weight: 700;
+}
+
+.tab-form-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.lead-subtitle {
+  color: #f97316;
+  font-size: 14px;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.lead-title {
+  color: #0f172a;
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 6px 0;
+  line-height: 1.25;
+}
+
+.lead-desc {
+  color: #64748b;
+  font-size: 13px;
+  margin: 0 0 20px 0;
+  line-height: 1.4;
+}
+
+.lead-form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.optional-tag {
+  color: #94a3b8;
+  font-weight: 400;
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+.form-field input[type="text"],
+.form-field input[type="tel"],
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 14px;
+  color: #0f172a;
+  background-color: #ffffff;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
+}
+
+.form-field textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.quick-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.chip-btn {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1e293b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chip-btn:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.privacy-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  cursor: pointer;
+}
+
+.privacy-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #f97316;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.privacy-checkbox span {
+  font-size: 13px;
+  font-weight: 500;
+  color: #475569;
+}
+
+.orange-submit-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  padding: 14px 20px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(249, 115, 22, 0.35);
+  transition: all 0.2s ease;
+  margin-top: 4px;
+}
+
+.orange-submit-btn:hover {
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  box-shadow: 0 8px 20px rgba(249, 115, 22, 0.45);
+  transform: translateY(-1px);
+}
+
+.orange-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Direct Contact Widget Card */
+.direct-contact-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 20px 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  border: 1px solid #f1f5f9;
+}
+
+.contact-card-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 2px 0;
+}
+
+.contact-card-sub {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0 0 14px 0;
+}
+
+.contact-buttons-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.contact-tile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: transform 0.15s ease;
+}
+
+.contact-tile:hover {
+  transform: translateY(-1px);
+}
+
+.phone-tile {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.line-tile {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.contact-tile-icon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.line-icon {
+  background: #22c55e;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 900;
+  border-radius: 6px;
+  padding: 2px 4px;
+}
+
+.contact-tile-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-tile-text small {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+.contact-tile-text strong {
+  font-size: 12px;
+  font-weight: 800;
+}
+

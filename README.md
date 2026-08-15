@@ -1,68 +1,85 @@
-# CLUBROD — Local Recovery Package
+# CLUBROD — Editable Source Project & Local Recovery
 
-This package was recovered from the published CLUBROD website using a Chrome DevTools HAR capture.
+โปรเจกต์นี้ได้รับการกู้คืนและแปลงจาก Production Build ให้กลายเป็น **Editable React Source Project** ที่รองรับ Vite สำหรับพัฒนาต่อได้โดยตรงใน Antigravity / VS Code
 
-## Important
+---
 
-This is a **production-build recovery**, not the original editable source project. The captured site contains compiled JavaScript/CSS and the HTML delivered to the browser. The original Next.js/Vinext source tree, package manifest, server implementation, and private environment variables were not present in the HAR.
+## 🚀 วิธีการรันโปรเจกต์ (Quick Start)
 
-## Run locally
+### ข้อกำหนด
+- Node.js 18+ (แนะนำ Node.js 20 LTS)
 
-Requirements: Node.js 18+ recommended.
-
+### การติดตั้งและเริ่มทำงาน
 ```bash
+# 1. ติดตั้ง dependencies
 npm install
+
+# 2. รันในโหมดพัฒนา (Development Mode)
 npm run dev
 ```
 
-Then open the local URL shown by Vite (normally http://localhost:5173/).
+เปิดเบราว์เซอร์ไปยัง URL ที่แสดงบน Terminal (ปกติคือ `http://localhost:5173/`)
 
-## What is included
+---
 
-- index.html — captured HTML shell and server-rendered homepage
-- assets/*.js — JavaScript bundles captured from the published site
-- assets/*.css — captured stylesheet
-- assets/_vinext_fonts/* — captured font files
-- favicon.svg
-- package.json — minimal Vite wrapper so the recovered static build can be served locally
-- .env.example — placeholder only; no secrets included
+## 📁 โครงสร้างโปรเจกต์ (Project Structure)
 
-## Detected application behavior
+```text
+CLUBROD-local-recovery/
+├── public/                     # Static assets สำหรับ Vite dev/build
+│   ├── assets/                 # Copy fonts, css, และ production static assets
+│   └── favicon.svg
+├── src/                        # 🌟 Editable Source Code (React 18 + Vite)
+│   ├── components/
+│   │   ├── common/             # Common UI (Logo, IconBox, StatCard, MultiImageUpload, ฯลฯ)
+│   │   ├── auth/               # LoginForm, AgentRegisterForm, AdvertiserRegisterForm, AuthLayoutCard
+│   │   ├── car/                # CarCard, CarDetailModal, AdminCarManager, AgentCarList, AdvertiserInventory
+│   │   └── dashboard/          # LeadTable, PanelLayout
+│   ├── pages/                  # หน้าเว็บหลัก (Home, AgentDashboard, AdvertiserDashboard, AdminDashboard)
+│   ├── layouts/                # Header, Footer, AppShell (Sidebar Nav)
+│   ├── data/                   # initialData.js (Sample Agents, Advertisers, Cars, Leads)
+│   ├── services/               # storage.js (localStorage Service), api.js (API Service Abstraction)
+│   ├── utils/                  # formatters.js (currency, masking, dedupe, helpers)
+│   ├── styles/                 # index.css (CLUBROD Design System)
+│   ├── App.jsx                 # App Router & Root State Management
+│   └── main.jsx                # React Entry point
+├── assets/                     # 🛡️ Production Build Backup (ต้นฉบับ HAR ที่กู้มา)
+├── index.production-backup.html # 🛡️ HTML Backup จาก Production Build เดิม
+├── index.html                  # HTML Shell สำหรับ Vite React
+├── vite.config.js              # Vite React Plugin Configuration
+├── package.json
+├── .env.example
+├── README.md
+└── RECOVERY_NOTES.md
+```
 
-The captured page bundle contains client-side data and logic for:
+---
 
-- CLUBROD marketplace homepage
-- car search/filtering
-- featured/selected car logic
-- agent registration/login/dashboard
-- advertiser/dealer registration/login/dashboard
-- admin area
-- customer lead flow
-- affiliate/referral attribution using a `ref` query parameter
-- localStorage persistence for cars, agents, advertisers and leads
-- inspection-report upload endpoint
-- chat endpoints
-- inspection coupon UI
+## 🔍 ข้อมูลระบบและ API / Storage ที่ตรวจพบ
 
-## Detected API routes in the captured bundle
+### 💾 localStorage Keys
+- `cc-cars`: ข้อมูลรายการรถยนต์ในระบบ
+- `cc-agents`: ข้อมูลสมาชิกนายหน้า (Broker / Affiliate)
+- `cc-advertisers`: ข้อมูลดีลเลอร์ / เต็นท์รถผู้ลงขาย
+- `cc-leads`: ข้อมูลผู้สนใจซื้อรถที่ส่งมาจากฟอร์มหรือลิงก์นายหน้า
+- `cc-first-touch`: ข้อมูลการติดตาม Referral Link (`ref` param)
 
-- POST /api/inspection-reports
-- GET/POST /api/chats
-- POST /api/chats?action=read
-- POST /api/chats?action=reply
-- POST /api/chats?action=create
-- GET /api/chats?...query parameters...
+### 🌐 API References
+- `POST /api/inspection-reports`: อัปโหลด PDF รายงานตรวจสภาพรถ
+- `GET /api/chats`: ดึงข้อความแชตสนทนา
+- `POST /api/chats`: ส่งข้อความแชต และบริหารจัดการห้องแชต
 
-The server implementations for these routes were **not captured** by this HAR and therefore are not included.
+---
 
-## Supabase status
+## 🛠️ สิ่งที่ถูกแปลงเป็น Editable Source vs สิ่งที่เป็น Backup
 
-The word `supabase` appears in the client bundle in setup/instruction content, but no Supabase client initialization or Supabase API URL/key was detected in the captured production bundle. This means the HAR does not prove that the current published site is actually connected to Supabase.
+### 🟢 แยกเป็น Editable Source แล้ว
+- โครงสร้าง React Components ทั้งหมด (Home, Detail Modal, Agent/Advertiser/Admin Dashboards)
+- State Management และ localStorage persistence logic ใน `src/services/storage.js`
+- API Abstraction Services ใน `src/services/api.js`
+- Design System และ Style classes ทั้งหมด
+- Sample Datasets ใน `src/data/initialData.js`
 
-## Source-map status
-
-No `.map` source-map asset was captured in the HAR. Therefore the original editable component/source tree cannot be reconstructed exactly from this capture alone.
-
-## Security note
-
-The production bundle contains demo/test account data and other client-side sample data. Treat all embedded credentials as compromised demo credentials and replace/remove them before production use. Do not commit real passwords, API keys, service-role keys, or other secrets to GitHub.
+### 🟡 สิ่งที่ยังเป็น Production Backup
+- โฟลเดอร์ `assets/` เดิม ถูกรักษาไว้เพื่อเป็นหลักฐานอ้างอิง
+- `index.production-backup.html` เก็บ Pre-rendered HTML จากระบบเดิมไว้เป็น Backup
