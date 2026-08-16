@@ -187,6 +187,7 @@ export function App() {
       {view === 'register' && (
         <AgentRegisterForm
           onBack={handleBackToHome}
+          onNavigateToLogin={() => setView('login')}
           onComplete={(newAgent) => {
             setAgents((prev) => [...prev, newAgent]);
             setView('login');
@@ -198,6 +199,7 @@ export function App() {
       {view === 'advertiser-register' && (
         <AdvertiserRegisterForm
           onBack={handleBackToHome}
+          onNavigateToLogin={() => setView('login')}
           onComplete={(newAdvertiser) => {
             setAdvertisers((prev) => [...prev, newAdvertiser]);
             setView('login');
@@ -212,6 +214,8 @@ export function App() {
           advertisers={advertisers}
           includeAdmin={includeAdmin}
           onBack={handleBackToHome}
+          onNavigateToRegister={() => setView('register')}
+          onNavigateToAdvertiserRegister={() => setView('advertiser-register')}
           onAgent={(agent) => {
             setCurrentAgent(agent);
             setView('agent');

@@ -13,9 +13,29 @@ export function Home({ cars, onRegister, onAdvertiserRegister, onLogin, onMobile
   const [selectedProvince, setSelectedProvince] = useState('');
   const [selectedMaxPrice, setSelectedMaxPrice] = useState('');
   const [selectedMaxInstallment, setSelectedMaxInstallment] = useState('');
-  const [expandSearch, setExpandSearch] = useState(false);
+  const [expandSearch, setExpandSearch] = useState(true);
   const [activeFilter, setActiveFilter] = useState('all');
   const [featuredIdx, setFeaturedIdx] = useState(0);
+
+  const activeFilterCount = [
+    selectedBrand,
+    selectedModel,
+    selectedType,
+    selectedYear,
+    selectedProvince,
+    selectedMaxPrice,
+    selectedMaxInstallment,
+  ].filter(Boolean).length;
+
+  const handleResetFilters = () => {
+    setSelectedBrand('');
+    setSelectedModel('');
+    setSelectedType('');
+    setSelectedYear('');
+    setSelectedProvince('');
+    setSelectedMaxPrice('');
+    setSelectedMaxInstallment('');
+  };
 
   const getUniqueSorted = (arr) =>
     Array.from(new Set(arr.filter(Boolean))).sort((a, b) => String(a).localeCompare(String(b), 'th'));
@@ -96,139 +116,200 @@ export function Home({ cars, onRegister, onAdvertiserRegister, onLogin, onMobile
             </p>
 
             {/* Search Panel */}
-            <div className="market-search-panel" aria-label="ค้นหารถ">
+            <div className={`market-search-panel ${expandSearch ? 'expanded' : 'collapsed'}`} aria-label="ค้นหารถ">
               <div className="market-search-heading">
-                <span>⌕</span>
-                <div>
-                  <strong>ค้นหารถที่ใช่สำหรับคุณ</strong>
-                  <small>คลิกเพื่อเปิดตัวเลือกเพิ่มเติม</small>
+                <div className="search-heading-left">
+                  <div className="search-icon-circle">🔍</div>
+                  <div className="search-title-group">
+                    <strong>ค้นหารถที่ใช่สำหรับคุณ</strong>
+                    <small>
+                      {expandSearch
+                        ? 'เลือกเงื่อนไขเพิ่มเติมได้จากแถวที่สอง'
+                        : activeFilterCount > 0
+                        ? `เลือกตัวกรองอยู่ (${activeFilterCount} รายการ)`
+                        : 'คลิกเพื่อเปิดตัวเลือกค้นหาแบบละเอียด'}
+                    </small>
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  className="search-expand-button"
-                  aria-expanded={expandSearch}
-                  aria-label="แสดงตัวเลือกเพิ่มเติม"
-                  onClick={() => setExpandSearch(!expandSearch)}
-                >
-                  {expandSearch ? 'ย่อตัวเลือก ▲' : 'เพิ่มเติม ▼'}
-                </button>
+
+                <div className="search-heading-actions">
+                  {activeFilterCount > 0 && (
+                    <button
+                      type="button"
+                      className="reset-filters-btn"
+                      onClick={handleResetFilters}
+                      title="ล้างตัวกรองทั้งหมด"
+                    >
+                      ล้างตัวกรอง
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="search-expand-button"
+                    aria-expanded={expandSearch}
+                    aria-label="ซ่อนหรือแสดงตัวเลือกค้นหา"
+                    onClick={() => setExpandSearch(!expandSearch)}
+                  >
+                    {expandSearch ? 'ซ่อน ▲' : 'แสดงตัวกรอง ▼'}
+                  </button>
+                </div>
               </div>
 
-              <div className="market-search-primary">
-                <label>
-                  <span>ยี่ห้อรถ</span>
-                  <select
-                    value={selectedBrand}
-                    onChange={(e) => {
-                      setSelectedBrand(e.target.value);
-                      setSelectedModel('');
-                    }}
-                  >
-                    <option value="">ทุกยี่ห้อ</option>
-                    {brands.map((b) => (
-                      <option key={b} value={b}>
-                        {b}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label>
-                  <span>รุ่นรถ</span>
-                  <select
-                    value={selectedModel}
-                    onChange={(e) => setSelectedModel(e.target.value)}
-                  >
-                    <option value="">ทุกรุ่น</option>
-                    {models.map((m) => (
-                      <option key={m} value={m}>
-                        {m}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label>
-                  <span>ปีรถ</span>
-                  <select
-                    value={selectedYear}
-                    onChange={(e) => setSelectedYear(e.target.value)}
-                  >
-                    <option value="">ทุกปี</option>
-                    {years.map((y) => (
-                      <option key={y} value={y}>
-                        ปี {y}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
+              {/* Active Filter Chips Preview when Collapsed */}
+              {!expandSearch && activeFilterCount > 0 && (
+                <div className="active-filters-chips-row">
+                  {selectedBrand && <span className="active-filter-chip">ยี่ห้อ: {selectedBrand}</span>}
+                  {selectedModel && <span className="active-filter-chip">รุ่น: {selectedModel}</span>}
+                  {selectedYear && <span className="active-filter-chip">ปี: {selectedYear}</span>}
+                  {selectedType && <span className="active-filter-chip">ประเภท: {selectedType}</span>}
+                  {selectedProvince && <span className="active-filter-chip">จังหวัด: {selectedProvince}</span>}
+                  {selectedMaxPrice && <span className="active-filter-chip">ไม่เกิน ฿{formatNumber(selectedMaxPrice)}</span>}
+                  {selectedMaxInstallment && <span className="active-filter-chip">ผ่อน ≤ ฿{formatNumber(selectedMaxInstallment)}</span>}
+                </div>
+              )}
 
               {expandSearch && (
-                <div className="market-search-secondary">
-                  <label>
-                    <span>ประเภทรถ</span>
-                    <select
-                      value={selectedType}
-                      onChange={(e) => setSelectedType(e.target.value)}
-                    >
-                      <option value="">ทุกประเภท</option>
-                      {types.map((t) => (
-                        <option key={t} value={t}>
-                          {t}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                <div className="search-fields-container">
+                  {/* Row 1: Brand, Model, Year */}
+                  <div className="search-row-grid primary-row">
+                    <div className="filter-field-group">
+                      <label className="field-label">ยี่ห้อรถ</label>
+                      <div className="select-input-wrapper">
+                        <select
+                          value={selectedBrand}
+                          onChange={(e) => {
+                            setSelectedBrand(e.target.value);
+                            setSelectedModel('');
+                          }}
+                        >
+                          <option value="">ทุกยี่ห้อ</option>
+                          {brands.map((b) => (
+                            <option key={b} value={b}>
+                              {b}
+                            </option>
+                          ))}
+                        </select>
+                        <span className="custom-select-arrow">▼</span>
+                      </div>
+                    </div>
 
-                  <label>
-                    <span>จังหวัด</span>
-                    <select
-                      value={selectedProvince}
-                      onChange={(e) => setSelectedProvince(e.target.value)}
-                    >
-                      <option value="">ทุกจังหวัด</option>
-                      {provinces.map((p) => (
-                        <option key={p} value={p}>
-                          {p}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                    <div className="filter-field-group">
+                      <label className="field-label">รุ่นรถ</label>
+                      <div className="select-input-wrapper">
+                        <select
+                          value={selectedModel}
+                          onChange={(e) => setSelectedModel(e.target.value)}
+                        >
+                          <option value="">ทุกรุ่น</option>
+                          {models.map((m) => (
+                            <option key={m} value={m}>
+                              {m}
+                            </option>
+                          ))}
+                        </select>
+                        <span className="custom-select-arrow">▼</span>
+                      </div>
+                    </div>
 
-                  <label>
-                    <span>ราคาไม่เกิน</span>
-                    <select
-                      value={selectedMaxPrice}
-                      onChange={(e) => setSelectedMaxPrice(e.target.value)}
-                    >
-                      <option value="">ทุกราคา</option>
-                      <option value="300000">300,000 บาท</option>
-                      <option value="400000">400,000 บาท</option>
-                      <option value="500000">500,000 บาท</option>
-                      <option value="700000">700,000 บาท</option>
-                      <option value="1000000">1,000,000 บาท</option>
-                    </select>
-                  </label>
+                    <div className="filter-field-group">
+                      <label className="field-label">ปีรถ</label>
+                      <div className="select-input-wrapper">
+                        <select
+                          value={selectedYear}
+                          onChange={(e) => setSelectedYear(e.target.value)}
+                        >
+                          <option value="">ทุกปี</option>
+                          {years.map((y) => (
+                            <option key={y} value={y}>
+                              ปี {y}
+                            </option>
+                          ))}
+                        </select>
+                        <span className="custom-select-arrow">▼</span>
+                      </div>
+                    </div>
+                  </div>
 
-                  <label>
-                    <span>ผ่อนต่อเดือนไม่เกิน</span>
-                    <select
-                      value={selectedMaxInstallment}
-                      onChange={(e) => setSelectedMaxInstallment(e.target.value)}
-                    >
-                      <option value="">ทุกเรทผ่อน</option>
-                      <option value="6000">6,000 บาท</option>
-                      <option value="8000">8,000 บาท</option>
-                      <option value="10000">10,000 บาท</option>
-                      <option value="15000">15,000 บาท</option>
-                      <option value="20000">20,000 บาท</option>
-                    </select>
-                  </label>
+                  {/* Row 2: Type, Province, Max Price, Installment, Submit */}
+                  <div className="search-row-grid secondary-row">
+                    <div className="filter-field-group">
+                      <label className="field-label">ประเภทรถ</label>
+                      <div className="select-input-wrapper">
+                        <select
+                          value={selectedType}
+                          onChange={(e) => setSelectedType(e.target.value)}
+                        >
+                          <option value="">ทุกประเภท</option>
+                          {types.map((t) => (
+                            <option key={t} value={t}>
+                              {t}
+                            </option>
+                          ))}
+                        </select>
+                        <span className="custom-select-arrow">▼</span>
+                      </div>
+                    </div>
 
-                  <a className="market-search-submit" href="#cars">
-                    ดูรถที่ค้นหา <b>→</b>
-                  </a>
+                    <div className="filter-field-group">
+                      <label className="field-label">จังหวัด</label>
+                      <div className="select-input-wrapper">
+                        <select
+                          value={selectedProvince}
+                          onChange={(e) => setSelectedProvince(e.target.value)}
+                        >
+                          <option value="">ทุกจังหวัด</option>
+                          {provinces.map((p) => (
+                            <option key={p} value={p}>
+                              {p}
+                            </option>
+                          ))}
+                        </select>
+                        <span className="custom-select-arrow">▼</span>
+                      </div>
+                    </div>
+
+                    <div className="filter-field-group">
+                      <label className="field-label">ราคาไม่เกิน</label>
+                      <div className="select-input-wrapper">
+                        <select
+                          value={selectedMaxPrice}
+                          onChange={(e) => setSelectedMaxPrice(e.target.value)}
+                        >
+                          <option value="">ทุกราคา</option>
+                          <option value="300000">300,000 บาท</option>
+                          <option value="400000">400,000 บาท</option>
+                          <option value="500000">500,000 บาท</option>
+                          <option value="700000">700,000 บาท</option>
+                          <option value="1000000">1,000,000 บาท</option>
+                        </select>
+                        <span className="custom-select-arrow">▼</span>
+                      </div>
+                    </div>
+
+                    <div className="filter-field-group">
+                      <label className="field-label">ผ่อนต่อเดือนไม่เกิน</label>
+                      <div className="select-input-wrapper">
+                        <select
+                          value={selectedMaxInstallment}
+                          onChange={(e) => setSelectedMaxInstallment(e.target.value)}
+                        >
+                          <option value="">ทุกเรทผ่อน</option>
+                          <option value="6000">6,000 บาท</option>
+                          <option value="8000">8,000 บาท</option>
+                          <option value="10000">10,000 บาท</option>
+                          <option value="15000">15,000 บาท</option>
+                          <option value="20000">20,000 บาท</option>
+                        </select>
+                        <span className="custom-select-arrow">▼</span>
+                      </div>
+                    </div>
+
+                    <div className="filter-submit-group">
+                      <a className="market-search-submit" href="#cars">
+                        ดูรถที่ค้นหา <b>→</b>
+                      </a>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

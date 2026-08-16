@@ -420,20 +420,20 @@ export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
                   className={`tab-toggle ${activeTab === 'chat' ? 'active' : ''}`}
                   onClick={() => setActiveTab('chat')}
                 >
-                  แชทกับทีมงาน
+                  <span className="tab-icon">💬</span> แชทกับทีมงาน
                 </button>
                 <button
                   type="button"
                   className={`tab-toggle ${activeTab === 'lead' ? 'active' : ''}`}
                   onClick={() => setActiveTab('lead')}
                 >
-                  ให้ติดต่อกลับ
+                  <span className="tab-icon">📞</span> ให้ติดต่อกลับ
                 </button>
               </div>
 
               {activeTab === 'chat' && (
                 <div className="chat-tab-content">
-                  <span className="lead-eyebrow">สอบถามรถคันนี้</span>
+                  <span className="lead-eyebrow">⚡ สอบถามรถคันนี้</span>
                   <h2 className="lead-title">
                     แชทกับทีม <strong>CLUBROD</strong>
                   </h2>
@@ -448,7 +448,7 @@ export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
                       <p>ทีมงานจะตอบกลับท่านผ่านระบบแชทโดยเร็วที่สุด</p>
                       <button
                         type="button"
-                        className="button full"
+                        className="btn-submit-lead"
                         onClick={() => setChatSent(false)}
                       >
                         ส่งข้อความเพิ่ม
@@ -456,8 +456,8 @@ export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
                     </div>
                   ) : (
                     <form onSubmit={handleChatSend} className="customer-form">
-                      <label>
-                        <span>ชื่อ</span>
+                      <label className="form-label-group">
+                        <span className="field-label">ชื่อ</span>
                         <input
                           type="text"
                           placeholder="ชื่อสำหรับสนทนา"
@@ -465,8 +465,8 @@ export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
                           onChange={(e) => setChatName(e.target.value)}
                         />
                       </label>
-                      <label>
-                        <span>เบอร์โทรศัพท์</span>
+                      <label className="form-label-group">
+                        <span className="field-label">เบอร์โทรศัพท์</span>
                         <input
                           type="tel"
                           placeholder="08X-XXX-XXXX"
@@ -481,7 +481,7 @@ export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
                           <button
                             key={idx}
                             type="button"
-                            className="chip-btn"
+                            className={`chip-btn ${chatMsg === q ? 'selected' : ''}`}
                             onClick={() => handleQuickQuestionClick(q)}
                           >
                             {q}
@@ -489,8 +489,8 @@ export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
                         ))}
                       </div>
 
-                      <label>
-                        <span>คำถามของคุณ</span>
+                      <label className="form-label-group">
+                        <span className="field-label">คำถามของคุณ</span>
                         <textarea
                           rows={3}
                           required
@@ -500,7 +500,7 @@ export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
                         />
                       </label>
 
-                      <label className="check">
+                      <label className="check-privacy">
                         <input
                           type="checkbox"
                           checked={chatPrivacyAccepted}
@@ -511,7 +511,7 @@ export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
 
                       <button
                         type="submit"
-                        className="button full"
+                        className="btn-submit-lead"
                         disabled={submitting}
                       >
                         {submitting ? 'กำลังส่ง...' : 'เริ่มแชทกับทีมงาน →'}
@@ -523,25 +523,29 @@ export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
 
               {activeTab === 'lead' && (
                 <div className="lead-tab-content">
-                  <span className="lead-eyebrow">นัดหมายดูรถ</span>
+                  <span className="lead-eyebrow">⚡ สนใจรถคันนี้?</span>
                   <h2 className="lead-title">ให้ทีมงานติดต่อกลับ</h2>
                   <p className="lead-sub">
-                    กรอกข้อมูลติดต่อ ทีมงานจะประสานนัดหมายดูรถให้คุณ
+                    กรอกข้อมูลสั้น ๆ ทีม CLUBROD จะช่วยประสานและตอบคำถามให้คุณ
                   </p>
 
                   <form onSubmit={handleLeadSubmit} className="customer-form">
-                    <label>
-                      <span>ชื่อ-นามสกุล *</span>
+                    <label className="form-label-group">
+                      <span className="field-label">
+                        ชื่อ <span className="req-star">*</span>
+                      </span>
                       <input
                         type="text"
                         required
-                        placeholder="กรอกชื่อ-นามสกุล"
+                        placeholder="ชื่อสำหรับติดต่อ"
                         value={leadName}
                         onChange={(e) => setLeadName(e.target.value)}
                       />
                     </label>
-                    <label>
-                      <span>เบอร์โทรศัพท์ *</span>
+                    <label className="form-label-group">
+                      <span className="field-label">
+                        เบอร์โทรศัพท์ <span className="req-star">*</span>
+                      </span>
                       <input
                         type="tel"
                         required
@@ -550,29 +554,34 @@ export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
                         onChange={(e) => setLeadPhone(e.target.value)}
                       />
                     </label>
-                    <label>
-                      <span>LINE ID</span>
+                    <label className="form-label-group">
+                      <span className="field-label">
+                        LINE ID <span className="optional-text">(ไม่บังคับ)</span>
+                      </span>
                       <input
                         type="text"
-                        placeholder="เช่น line_id (ถ้ามี)"
+                        placeholder="LINE ID"
                         value={leadLine}
                         onChange={(e) => setLeadLine(e.target.value)}
                       />
                     </label>
-                    <label>
-                      <span>ช่วงเวลาที่สะดวกให้ติดต่อกลับ</span>
-                      <select
-                        value={leadContactTime}
-                        onChange={(e) => setLeadContactTime(e.target.value)}
-                      >
-                        <option>09:00–12:00 น.</option>
-                        <option>13:00–16:00 น.</option>
-                        <option>16:00–19:00 น.</option>
-                        <option>สะดวกตลอดวัน</option>
-                      </select>
+                    <label className="form-label-group">
+                      <span className="field-label">เวลาที่สะดวกให้ติดต่อ</span>
+                      <div className="select-wrapper">
+                        <select
+                          value={leadContactTime}
+                          onChange={(e) => setLeadContactTime(e.target.value)}
+                        >
+                          <option>09:00–12:00 น.</option>
+                          <option>13:00–16:00 น.</option>
+                          <option>16:00–19:00 น.</option>
+                          <option>สะดวกตลอดวัน</option>
+                        </select>
+                        <span className="select-arrow">▼</span>
+                      </div>
                     </label>
 
-                    <label className="check">
+                    <label className="check-privacy">
                       <input
                         type="checkbox"
                         checked={leadPrivacyAccepted}
@@ -583,32 +592,42 @@ export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
 
                     <button
                       type="submit"
-                      className="button full"
+                      className="btn-submit-lead"
                       disabled={submitting}
                     >
-                      {submitting ? 'กำลังส่ง...' : 'ส่งข้อมูลติดต่อ →'}
+                      {submitting ? 'กำลังส่ง...' : 'ขอให้ติดต่อกลับ →'}
                     </button>
                   </form>
+                </div>
+              )}
+
+              {agentObj ? (
+                <div className="lead-footer-attribution">
+                  <span className="shield-icon">🛡️</span> ลิงก์แนะนำโดย <strong>{agentObj.name}</strong> · คุ้มครองสิทธิ์ 30 วัน
+                </div>
+              ) : (
+                <div className="lead-footer-attribution">
+                  <span className="shield-icon">🛡️</span> คุ้มครองสิทธิ์และบริการโดย <strong>CLUBROD Official</strong>
                 </div>
               )}
             </div>
 
             {/* Direct Contact Options */}
             <div className="direct-contact-card">
-              <div>
+              <div className="direct-contact-header">
                 <strong>สอบถามโดยตรงกับผู้ดูแล</strong>
                 <small>ประสานงานและตอบคำถามอย่างรวดเร็ว</small>
               </div>
               <div className="direct-contact-actions">
                 <a href="tel:0823456789" className="phone-contact">
-                  <span>📞</span>
+                  <span className="icon-circle">📞</span>
                   <div>
                     <small>โทรสอบถาม</small>
                     <strong>082-345-6789</strong>
                   </div>
                 </a>
                 <a href="https://line.me" target="_blank" rel="noreferrer" className="line-contact">
-                  <span>💬</span>
+                  <span className="icon-circle line">💬</span>
                   <div>
                     <small>สอบถามทาง LINE</small>
                     <strong>@clubrod</strong>
@@ -616,12 +635,6 @@ export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
                 </a>
               </div>
             </div>
-
-            {agentObj && (
-              <small className="attribution-note">
-                อ้างอิงรหัสนายหน้า: {agentObj.code} ({agentObj.name})
-              </small>
-            )}
           </div>
         </div>
       </div>

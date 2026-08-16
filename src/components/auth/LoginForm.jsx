@@ -1,10 +1,21 @@
 import React, { useState } from 'react';
 import AuthLayoutCard from './AuthLayoutCard';
 
-export function LoginForm({ agents, advertisers, includeAdmin, onBack, onAgent, onAdvertiser, onAdmin }) {
+export function LoginForm({
+  agents,
+  advertisers,
+  includeAdmin,
+  onBack,
+  onAgent,
+  onAdvertiser,
+  onAdmin,
+  onNavigateToRegister,
+  onNavigateToAdvertiserRegister,
+}) {
   const [role, setRole] = useState('agent');
   const [email, setEmail] = useState('agent@clubrod.com');
   const [password, setPassword] = useState('agent1234');
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
   const handleRoleChange = (newRole) => {
@@ -38,7 +49,6 @@ export function LoginForm({ agents, advertisers, includeAdmin, onBack, onAgent, 
         (a) => a.email.toLowerCase() === email.trim().toLowerCase() && a.password === password.trim()
       );
       if (!match) {
-        // Fallback demo match for first approved agent if typing mismatch
         if (agents.length > 0) return onAgent(agents[0]);
         return setErrorMsg('อีเมลหรือรหัสผ่านไม่ถูกต้อง');
       }
@@ -68,88 +78,153 @@ export function LoginForm({ agents, advertisers, includeAdmin, onBack, onAgent, 
   };
 
   return (
-    <AuthLayoutCard title="ยินดีต้อนรับกลับ" subtitle="เข้าสู่ระบบ CLUBROD" onBack={onBack}>
-      <div className="role-switch">
+    <AuthLayoutCard
+      title="เข้าสู่ระบบ"
+      subtitle="เลือกประเภทบัญชีผู้ใช้เพื่อเริ่มต้นใช้งานระบบ"
+      onBack={onBack}
+    >
+      {/* Role Selector Tabs */}
+      <div className="role-switch-pills">
         <button
           type="button"
-          className={role === 'agent' ? 'active' : ''}
+          className={`role-pill ${role === 'agent' ? 'active' : ''}`}
           onClick={() => handleRoleChange('agent')}
         >
-          นายหน้า
+          <span className="role-icon">🤝</span>
+          <span className="role-label">นายหน้า (Agent)</span>
         </button>
         <button
           type="button"
-          className={role === 'advertiser' ? 'active' : ''}
+          className={`role-pill ${role === 'advertiser' ? 'active' : ''}`}
           onClick={() => handleRoleChange('advertiser')}
         >
-          Advertiser
+          <span className="role-icon">🏪</span>
+          <span className="role-label">เต็นท์รถ (Dealer)</span>
         </button>
         {includeAdmin && (
           <button
             type="button"
-            className={role === 'admin' ? 'active' : ''}
+            className={`role-pill ${role === 'admin' ? 'active' : ''}`}
             onClick={() => handleRoleChange('admin')}
           >
-            แอดมิน
+            <span className="role-icon">👑</span>
+            <span className="role-label">แอดมิน (Admin)</span>
           </button>
         )}
       </div>
 
       <form className="auth-form" onSubmit={handleSubmit}>
-        {errorMsg && <div className="error-banner">{errorMsg}</div>}
-        <label>
-          <span>อีเมล</span>
-          <input
-            type="email"
-            name="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            placeholder="your@email.com"
-          />
-        </label>
-        <label>
-          <span>รหัสผ่าน</span>
-          <input
-            type="password"
-            name="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            placeholder="••••••••"
-          />
-        </label>
-        <button type="submit" className="button full">
-          เข้าสู่ระบบ →
+        {errorMsg && (
+          <div className="error-banner">
+            <span className="error-icon">⚠️</span>
+            <span>{errorMsg}</span>
+          </div>
+        )}
+
+        <div className="form-group">
+          <label htmlFor="login-email">อีเมลสำหรับเข้าสู่ระบบ</label>
+          <div className="input-icon-wrapper">
+            <span className="field-icon">✉️</span>
+            <input
+              id="login-email"
+              type="email"
+              name="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="name@example.com"
+              className="clean-input"
+            />
+          </div>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="login-password">รหัสผ่าน</label>
+          <div className="input-icon-wrapper">
+            <span className="field-icon">🔒</span>
+            <input
+              id="login-password"
+              type={showPassword ? 'text' : 'password'}
+              name="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="อย่างน้อย 6 ตัวอักษร"
+              className="clean-input"
+            />
+            <button
+              type="button"
+              className="password-toggle-btn"
+              onClick={() => setShowPassword(!showPassword)}
+              title={showPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
+              tabIndex={-1}
+            >
+              {showPassword ? '🙈' : '👁️'}
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" className="auth-primary-btn">
+          <span>เข้าสู่ระบบ</span>
+          <span className="arrow-icon">→</span>
         </button>
       </form>
 
+      {/* Switch to Registration Links */}
+      <div className="auth-switch-prompt">
+        <p className="switch-text">
+          ยังไม่มีบัญชีนายหน้า?{' '}
+          <button
+            type="button"
+            className="link-highlight"
+            onClick={onNavigateToRegister || onBack}
+          >
+            สมัครเป็นนายหน้าสร้างรายได้ฟรี →
+          </button>
+        </p>
+        {onNavigateToAdvertiserRegister && (
+          <p className="switch-text secondary">
+            สำหรับเต็นท์รถ?{' '}
+            <button
+              type="button"
+              className="link-subtle"
+              onClick={onNavigateToAdvertiserRegister}
+            >
+              ลงทะเบียนพันธมิตรเต็นท์รถ
+            </button>
+          </p>
+        )}
+      </div>
+
       {/* Quick Test Login Helpers */}
       <div className="quick-login-box">
-        <span className="quick-title">⚡ ปุ่มทางลัดเข้าสู่ระบบสำหรับทดสอบ:</span>
+        <div className="quick-title-row">
+          <span className="pulse-dot">●</span>
+          <span>ปุ่มทางลัดเข้าสู่ระบบสำหรับทดสอบ (Demo)</span>
+        </div>
         <div className="quick-buttons-row">
           <button
             type="button"
-            className="quick-btn agent-quick"
+            className="quick-chip agent-chip"
             onClick={() => handleQuickLogin('agent')}
           >
-            👤 ทดสอบเป็นนายหน้า (Agent)
+            <span className="chip-icon">👤</span> นายหน้า
           </button>
           <button
             type="button"
-            className="quick-btn dealer-quick"
+            className="quick-chip dealer-chip"
             onClick={() => handleQuickLogin('advertiser')}
           >
-            🏪 ทดสอบเป็นเต็นท์ (Advertiser)
+            <span className="chip-icon">🏪</span> เต็นท์รถ
           </button>
 
           {includeAdmin && (
             <button
               type="button"
-              className="quick-btn admin-quick"
+              className="quick-chip admin-chip"
               onClick={() => handleQuickLogin('admin')}
             >
-              👑 ทดสอบเป็นแอดมิน (Admin)
+              <span className="chip-icon">👑</span> แอดมิน
             </button>
           )}
         </div>
