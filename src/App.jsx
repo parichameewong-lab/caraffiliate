@@ -3,6 +3,7 @@ import { getStorage, setStorage, KEYS } from './services/storage';
 import { initialAgents, initialAdvertisers, initialCars, initialLeads } from './data/initialData';
 import Home from './pages/Home';
 import AgentDashboard from './pages/AgentDashboard';
+import AgentStorefront from './pages/AgentStorefront';
 import AdvertiserDashboard from './pages/AdvertiserDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import CarDetailModal from './components/car/CarDetailModal';
@@ -22,6 +23,7 @@ export function App() {
   const [currentAgent, setCurrentAgent] = useState(null);
   const [currentAdvertiser, setCurrentAdvertiser] = useState(null);
   const [selectedCar, setSelectedCar] = useState(initialCars[0]);
+  const [activeStorefrontAgent, setActiveStorefrontAgent] = useState(null);
 
   const [agentTab, setAgentTab] = useState('overview');
   const [adminTab, setAdminTab] = useState('overview');
@@ -47,31 +49,45 @@ export function App() {
       const params = new URLSearchParams(window.location.search);
       const carId = params.get('car');
       const refCode = params.get('ref');
+      const viewParam = params.get('view');
 
-      if (carId) {
-        const foundCar = storedCars.find((c) => c.id === carId);
-        if (foundCar) setSelectedCar(foundCar);
-        setView('customer');
+      if (refCode) {
+        const foundAgent = storedAgents.find(
+          (a) => a.code === refCode || a.code.toLowerCase() === refCode.toLowerCase()
+        );
+        if (foundAgent) {
+          setActiveStorefrontAgent(foundAgent);
+        } else {
+          setActiveStorefrontAgent(storedAgents[0]);
+        }
 
         try {
           const firstTouch = JSON.parse(localStorage.getItem(KEYS.FIRST_TOUCH) || 'null');
           const isFresh = firstTouch && Date.now() - firstTouch.createdAt < 30 * 24 * 60 * 60 * 1000;
 
-          if (refCode && !isFresh) {
+          if (!isFresh) {
             localStorage.setItem(
               KEYS.FIRST_TOUCH,
               JSON.stringify({ agentCode: refCode, createdAt: Date.now() })
             );
             setAttribution(refCode);
-          } else if (isFresh) {
-            setAttribution(firstTouch.agentCode);
           } else {
-            localStorage.removeItem(KEYS.FIRST_TOUCH);
-            setAttribution('PLATFORM');
+            setAttribution(firstTouch.agentCode);
           }
         } catch {
-          setAttribution('PLATFORM');
+          setAttribution(refCode);
         }
+
+        if (viewParam === 'storefront') {
+          setView('storefront');
+          return;
+        }
+      }
+
+      if (carId) {
+        const foundCar = storedCars.find((c) => c.id === carId);
+        if (foundCar) setSelectedCar(foundCar);
+        setView('customer');
       }
     }, 0);
 
@@ -103,8 +119,6 @@ export function App() {
   const handleBackToHome = () => {
     window.history.replaceState({}, '', window.location.pathname);
     setView('home');
-    setCurrentAgent(null);
-    setCurrentAdvertiser(null);
   };
 
   const handleSelectCar = (car, refCode) => {
@@ -126,6 +140,18 @@ export function App() {
     setView('customer');
   };
 
+  const handlePreviewStorefront = (agentCode, carId) => {
+    const foundAgent = agents.find((a) => a.code === agentCode) || currentAgent || agents[0];
+    setActiveStorefrontAgent(foundAgent);
+    if (carId) {
+      const foundCar = cars.find((c) => c.id === carId);
+      if (foundCar) setSelectedCar(foundCar);
+      setView('customer');
+    } else {
+      setView('storefront');
+    }
+  };
+
   return (
     <main>
       {view === 'home' && (
@@ -142,6 +168,19 @@ export function App() {
             setView('login');
           }}
           onSelect={handleSelectCar}
+        />
+      )}
+
+      {view === 'storefront' && (
+        <AgentStorefront
+          agent={activeStorefrontAgent || agents[0]}
+          cars={cars}
+          onSelectCar={handleSelectCar}
+          onBackHome={handleBackToHome}
+          onLeadSubmitted={(newLead) => {
+            setLeads((prev) => [newLead, ...prev]);
+          }}
+          showToast={showToast}
         />
       )}
 
@@ -194,6 +233,7 @@ export function App() {
           setTab={setAgentTab}
           onLogout={handleBackToHome}
           onPreview={handleSelectCar}
+          onPreviewStorefront={handlePreviewStorefront}
           showToast={showToast}
         />
       )}

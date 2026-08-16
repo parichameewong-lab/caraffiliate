@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { formatNumber, getCarImages, generateId } from '../../utils/formatters';
 import { createConversation } from '../../services/api';
 
 export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('chat'); // 'chat' or 'lead'
+
+  // Image gallery slider & zoom state
+  const [activeImgIndex, setActiveImgIndex] = useState(0);
+  const [isZoomOpen, setIsZoomOpen] = useState(false);
+  const [zoomScale, setZoomScale] = useState(1);
 
   // Chat tab state
   const [chatName, setChatName] = useState('');
@@ -20,10 +25,31 @@ export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
   const [leadContactTime, setLeadContactTime] = useState('13:00–16:00 น.');
   const [leadPrivacyAccepted, setLeadPrivacyAccepted] = useState(true);
 
+  // Coupon form state
+  const [showCouponForm, setShowCouponForm] = useState(false);
+  const [couponName, setCouponName] = useState('');
+  const [couponPhone, setCouponPhone] = useState('');
+  const [couponLine, setCouponLine] = useState('');
+  const [couponAccepted, setCouponAccepted] = useState(true);
+  const [couponSubmitted, setCouponSubmitted] = useState(false);
+
+  const images = getCarImages(car);
+
+  // Keyboard navigation for zoom modal
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!isZoomOpen) return;
+      if (e.key === 'Escape') setIsZoomOpen(false);
+      if (e.key === 'ArrowRight') handleNextImage();
+      if (e.key === 'ArrowLeft') handlePrevImage();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isZoomOpen, images.length]);
+
   if (!car) return null;
 
   const agentObj = agents?.find((a) => a.code === attribution);
-  const images = getCarImages(car);
 
   const quickQuestions = [
     'รถยังอยู่ไหมครับ?',
@@ -34,6 +60,31 @@ export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
 
   const handleQuickQuestionClick = (qText) => {
     setChatMsg(qText);
+  };
+
+  const handleNextImage = () => {
+    setActiveImgIndex((prev) => (prev + 1) % images.length);
+    setZoomScale(1);
+  };
+
+  const handlePrevImage = () => {
+    setActiveImgIndex((prev) => (prev - 1 + images.length) % images.length);
+    setZoomScale(1);
+  };
+
+  const handleOpenZoom = () => {
+    setZoomScale(1);
+    setIsZoomOpen(true);
+  };
+
+  const handleZoomIn = (e) => {
+    e?.stopPropagation();
+    setZoomScale((prev) => Math.min(prev + 0.5, 3));
+  };
+
+  const handleZoomOut = (e) => {
+    e?.stopPropagation();
+    setZoomScale((prev) => Math.max(prev - 0.5, 1));
   };
 
   const handleLeadSubmit = (e) => {
@@ -63,6 +114,39 @@ export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
     setSubmitting(false);
   };
 
+  const handleCouponSubmit = (e) => {
+    e.preventDefault();
+    if (!couponAccepted) {
+      alert('กรุณายินยอมให้ทีมงานติดต่อกลับเพื่อยืนยันสิทธิ์ก่อนลงทะเบียน');
+      return;
+    }
+    if (!couponName.trim() || !couponPhone.trim()) {
+      alert('กรุณากรอกชื่อ-นามสกุล และเบอร์โทรศัพท์');
+      return;
+    }
+
+    setSubmitting(true);
+
+    const newLead = {
+      id: `lead-${generateId()}`,
+      carId: car.id,
+      agentCode: attribution || 'PLATFORM',
+      name: couponName.trim(),
+      phone: couponPhone.trim(),
+      line: couponLine.trim(),
+      contactTime: 'ลงทะเบียนรับคูปองตรวจสภาพรถฟรี (มูลค่า 1,500 บาท)',
+      createdAt: new Date().toISOString(),
+      leadStatus: 'รอนัดหมาย',
+      saleStatus: 'สนใจรถ',
+      payoutStatus: 'ยังไม่เกิดสิทธิ์',
+      type: 'COUPON_CLAIM',
+    };
+
+    onLead(newLead);
+    setSubmitting(false);
+    setCouponSubmitted(true);
+  };
+
   const handleChatSend = async (e) => {
     e.preventDefault();
     if (!chatPrivacyAccepted) {
@@ -83,6 +167,8 @@ export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
     }
   };
 
+  const currentImg = images[activeImgIndex] || images[0];
+
   return (
     <div className="customer-page">
       <div className="container">
@@ -93,24 +179,85 @@ export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
         <div className="detail-grid">
           {/* Left Column - Car Presentation & Info */}
           <div className="detail-left-column">
-            <div className="detail-gallery">
-              <div className="main-photo" style={{ background: car.tone }}>
+            {/* CAROUSEL SLIDER GALLERY */}
+            <div className="detail-gallery-slider">
+              <div className="slider-main-photo" style={{ background: car.tone }}>
                 <div className="hero-selected-badge">CLUBROD SELECTED CAR</div>
-                {images[0] ? (
-                  <img src={images[0]} alt={car.title} />
+                
+                {/* Image Counter & Zoom Indicator */}
+                <div className="slider-top-controls">
+                  <span className="slider-counter-chip">
+                    📷 {activeImgIndex + 1} / {images.length}
+                  </span>
+                  <button
+                    type="button"
+                    className="slider-zoom-trigger"
+                    onClick={handleOpenZoom}
+                    title="คลิกเพื่อขยายดูรูปขนาดใหญ่"
+                  >
+                    🔍 กดขยายรูปภาพ
+                  </button>
+                </div>
+
+                {/* Subtle CLUBROD Watermark Overlay */}
+                <div className="clubrod-watermark-overlay">
+                  <span className="watermark-text">CLUBROD</span>
+                </div>
+
+                {/* Main Slide Image */}
+                {currentImg ? (
+                  <img
+                    src={currentImg}
+                    alt={`${car.title} รูปที่ ${activeImgIndex + 1}`}
+                    onClick={handleOpenZoom}
+                    className="slide-image-cursor"
+                  />
                 ) : (
                   <div className="photo-placeholder">{car.brand?.toUpperCase()}</div>
                 )}
+
+                {/* Prev / Next Slider Arrows */}
+                {images.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      className="slider-arrow slider-arrow-left"
+                      onClick={handlePrevImage}
+                      aria-label="รูปก่อนหน้า"
+                    >
+                      ❮
+                    </button>
+                    <button
+                      type="button"
+                      className="slider-arrow slider-arrow-right"
+                      onClick={handleNextImage}
+                      aria-label="รูปถัดไป"
+                    >
+                      ❯
+                    </button>
+                  </>
+                )}
               </div>
+
+              {/* Thumbnails Row */}
               {images.length > 1 && (
-                <div className="sub-photos">
-                  {images.slice(1).map((img, i) => (
-                    <img key={i} src={img} alt={`${car.title} ${i + 2}`} />
+                <div className="slider-thumbnails-row">
+                  {images.map((imgUrl, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      className={`thumbnail-item ${idx === activeImgIndex ? 'active' : ''}`}
+                      onClick={() => setActiveImgIndex(idx)}
+                    >
+                      <img src={imgUrl} alt={`รูปเล็ก ${idx + 1}`} />
+                      <div className="thumbnail-watermark">CLUBROD</div>
+                    </button>
                   ))}
                 </div>
               )}
             </div>
 
+            {/* Car Header Card */}
             <div className="car-header-card">
               <div className="car-header-left">
                 <span className="brand-sublabel">รถคัดสภาพจาก CLUBROD</span>
@@ -157,99 +304,193 @@ export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
                 </div>
               </div>
 
-              <div className="coupon-card">
+              <div className={`coupon-card ${showCouponForm ? 'expanded' : ''}`}>
                 <div className="coupon-top-content">
                   <div className="coupon-icon-box">✓</div>
                   <div className="coupon-text-group">
                     <span className="coupon-sublabel">สิทธิพิเศษสำหรับผู้ซื้อรถคันนี้</span>
-                    <h4 className="coupon-title">คูปองตรวจสภาพรถฟรี</h4>
+                    <h3 className="coupon-title">คูปองตรวจสภาพรถฟรี</h3>
                     <p className="coupon-desc">
-                      มูลค่า <strong>1,500 บาท</strong> · เมื่อซื้อรถสำเร็จ รับเงินสดตามมูลค่าคูปอง
+                      มูลค่า <strong className="orange-text">1,500 บาท</strong> · เมื่อซื้อรถสำเร็จ รับเงินสดตามมูลค่าคูปอง
                     </p>
                   </div>
-                  <button type="button" className="coupon-cta-btn" onClick={() => setActiveTab('lead')}>
-                    ขอรับสิทธิ์
-                  </button>
+                  {showCouponForm ? (
+                    <button
+                      type="button"
+                      className="coupon-toggle-btn close-btn"
+                      onClick={() => setShowCouponForm(false)}
+                    >
+                      ปิดแบบฟอร์ม
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="coupon-cta-btn"
+                      onClick={() => setShowCouponForm(true)}
+                    >
+                      ขอรับสิทธิ์
+                    </button>
+                  )}
                 </div>
-                <p className="coupon-disclaimer">
-                  การรับเงินสดเกิดขึ้นหลังยืนยันการซื้อรถสำเร็จ และเป็นไปตามเงื่อนไขของแพลตฟอร์ม
-                </p>
+
+                {showCouponForm && (
+                  <>
+                    <div className="coupon-dashed-divider" />
+
+                    {couponSubmitted ? (
+                      <div className="coupon-success-box">
+                        <div className="success-icon">✓</div>
+                        <h4>ลงทะเบียนรับคูปองเรียบร้อยแล้ว</h4>
+                        <p>ทีมงาน CLUBROD จะติดต่อกลับที่เบอร์ {couponPhone} เพื่อยืนยันสิทธิ์และรายละเอียด</p>
+                        <button
+                          type="button"
+                          className="coupon-reset-btn"
+                          onClick={() => {
+                            setCouponSubmitted(false);
+                            setShowCouponForm(false);
+                          }}
+                        >
+                          ตกลง
+                        </button>
+                      </div>
+                    ) : (
+                      <form onSubmit={handleCouponSubmit} className="coupon-form-body">
+                        <div className="coupon-fields-grid">
+                          <label className="coupon-field">
+                            <span className="field-label-bold">ชื่อ–นามสกุล</span>
+                            <input
+                              type="text"
+                              required
+                              placeholder="ชื่อผู้ขอรับสิทธิ์"
+                              value={couponName}
+                              onChange={(e) => setCouponName(e.target.value)}
+                            />
+                          </label>
+                          <label className="coupon-field">
+                            <span className="field-label-bold">เบอร์โทรศัพท์</span>
+                            <input
+                              type="tel"
+                              required
+                              placeholder="08X-XXX-XXXX"
+                              value={couponPhone}
+                              onChange={(e) => setCouponPhone(e.target.value)}
+                            />
+                          </label>
+                          <label className="coupon-field">
+                            <span className="field-label-bold">LINE ID</span>
+                            <input
+                              type="text"
+                              placeholder="เช่น line_id (ถ้ามี)"
+                              value={couponLine}
+                              onChange={(e) => setCouponLine(e.target.value)}
+                            />
+                          </label>
+                        </div>
+                        <div className="coupon-check-row">
+                          <label className="checkbox-custom-label">
+                            <input
+                              type="checkbox"
+                              checked={couponAccepted}
+                              onChange={(e) => setCouponAccepted(e.target.checked)}
+                            />
+                            <span>ยินยอมให้ทีมงานติดต่อกลับเพื่อยืนยันสิทธิ์ก่อนซื้อขาย</span>
+                          </label>
+                          <button
+                            type="submit"
+                            className="coupon-submit-btn"
+                            disabled={submitting}
+                          >
+                            {submitting ? 'กำลังส่ง...' : 'ยืนยันลงทะเบียน →'}
+                          </button>
+                        </div>
+                      </form>
+                    )}
+                  </>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Right Column - Form Card & Direct Contact Widget */}
-          <div className="detail-right-column">
-            <div className="lead-card-box">
-              <div className="action-tabs-bar">
+          {/* Right Column - Contact Form Box */}
+          <div className="customer-contact-column">
+            <div className="lead-card">
+              <div className="lead-tabs-row">
                 <button
                   type="button"
-                  className={`tab-btn ${activeTab === 'chat' ? 'active' : ''}`}
+                  className={`tab-toggle ${activeTab === 'chat' ? 'active' : ''}`}
                   onClick={() => setActiveTab('chat')}
                 >
                   แชทกับทีมงาน
                 </button>
                 <button
                   type="button"
-                  className={`tab-btn ${activeTab === 'lead' ? 'active' : ''}`}
+                  className={`tab-toggle ${activeTab === 'lead' ? 'active' : ''}`}
                   onClick={() => setActiveTab('lead')}
                 >
                   ให้ติดต่อกลับ
                 </button>
               </div>
 
-              {activeTab === 'chat' ? (
-                <div className="tab-form-content">
-                  <span className="lead-subtitle">สอบถามรถคันนี้</span>
-                  <h2 className="lead-title">แชทกับทีม CLUBROD</h2>
-                  <p className="lead-desc">ส่งคำถามถึงแอดมิน พร้อมแนบข้อมูลรถคันนี้ให้อัตโนมัติ</p>
+              {activeTab === 'chat' && (
+                <div className="chat-tab-content">
+                  <span className="lead-eyebrow">สอบถามรถคันนี้</span>
+                  <h2 className="lead-title">
+                    แชทกับทีม <strong>CLUBROD</strong>
+                  </h2>
+                  <p className="lead-sub">
+                    ส่งคำถามถึงแอดมิน พร้อมแนบข้อมูลรถคันนี้ให้อัตโนมัติ
+                  </p>
 
                   {chatSent ? (
-                    <div className="chat-success-msg">
-                      ✓ ส่งข้อความเรียบร้อยแล้ว ทีมงานจะตอบกลับโดยเร็วที่สุด
+                    <div className="chat-sent-success">
+                      <div className="success-icon">✓</div>
+                      <h3>ส่งข้อความเรียบร้อยแล้ว</h3>
+                      <p>ทีมงานจะตอบกลับท่านผ่านระบบแชทโดยเร็วที่สุด</p>
+                      <button
+                        type="button"
+                        className="button full"
+                        onClick={() => setChatSent(false)}
+                      >
+                        ส่งข้อความเพิ่ม
+                      </button>
                     </div>
                   ) : (
-                    <form onSubmit={handleChatSend} className="lead-form-grid">
-                      <label className="form-field">
-                        <span className="field-label">ชื่อ</span>
+                    <form onSubmit={handleChatSend} className="customer-form">
+                      <label>
+                        <span>ชื่อ</span>
                         <input
                           type="text"
-                          required
                           placeholder="ชื่อสำหรับสนทนา"
                           value={chatName}
                           onChange={(e) => setChatName(e.target.value)}
                         />
                       </label>
-
-                      <label className="form-field">
-                        <span className="field-label">เบอร์โทรศัพท์</span>
+                      <label>
+                        <span>เบอร์โทรศัพท์</span>
                         <input
                           type="tel"
-                          required
                           placeholder="08X-XXX-XXXX"
                           value={chatPhone}
                           onChange={(e) => setChatPhone(e.target.value)}
                         />
                       </label>
 
-                      <div className="form-field">
-                        <span className="field-label">เลือกคำถามด่วน</span>
-                        <div className="quick-chips">
-                          {quickQuestions.map((q, idx) => (
-                            <button
-                              key={idx}
-                              type="button"
-                              className="chip-btn"
-                              onClick={() => handleQuickQuestionClick(q)}
-                            >
-                              {q}
-                            </button>
-                          ))}
-                        </div>
+                      <div className="quick-questions-label">เลือกคำถามด่วน</div>
+                      <div className="quick-questions-chips">
+                        {quickQuestions.map((q, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            className="chip-btn"
+                            onClick={() => handleQuickQuestionClick(q)}
+                          >
+                            {q}
+                          </button>
+                        ))}
                       </div>
 
-                      <label className="form-field">
-                        <span className="field-label">คำถามของคุณ</span>
+                      <label>
+                        <span>คำถามของคุณ</span>
                         <textarea
                           rows={3}
                           required
@@ -259,7 +500,7 @@ export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
                         />
                       </label>
 
-                      <label className="privacy-checkbox">
+                      <label className="check">
                         <input
                           type="checkbox"
                           checked={chatPrivacyAccepted}
@@ -268,32 +509,39 @@ export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
                         <span>ยอมรับนโยบายความเป็นส่วนตัว</span>
                       </label>
 
-                      <button type="submit" disabled={submitting} className="orange-submit-btn">
-                        {submitting ? 'กำลังส่งข้อมูล...' : 'เริ่มแชทกับทีมงาน →'}
+                      <button
+                        type="submit"
+                        className="button full"
+                        disabled={submitting}
+                      >
+                        {submitting ? 'กำลังส่ง...' : 'เริ่มแชทกับทีมงาน →'}
                       </button>
                     </form>
                   )}
                 </div>
-              ) : (
-                <div className="tab-form-content">
-                  <span className="lead-subtitle">สนใจรถคันนี้?</span>
-                  <h2 className="lead-title">ให้ทีมงานติดต่อกลับ</h2>
-                  <p className="lead-desc">กรอกข้อมูลสั้น ๆ ทีม CLUBROD จะช่วยประสานและตอบคำถามให้คุณ</p>
+              )}
 
-                  <form onSubmit={handleLeadSubmit} className="lead-form-grid">
-                    <label className="form-field">
-                      <span className="field-label">ชื่อ</span>
+              {activeTab === 'lead' && (
+                <div className="lead-tab-content">
+                  <span className="lead-eyebrow">นัดหมายดูรถ</span>
+                  <h2 className="lead-title">ให้ทีมงานติดต่อกลับ</h2>
+                  <p className="lead-sub">
+                    กรอกข้อมูลติดต่อ ทีมงานจะประสานนัดหมายดูรถให้คุณ
+                  </p>
+
+                  <form onSubmit={handleLeadSubmit} className="customer-form">
+                    <label>
+                      <span>ชื่อ-นามสกุล *</span>
                       <input
                         type="text"
                         required
-                        placeholder="ชื่อสำหรับติดต่อ"
+                        placeholder="กรอกชื่อ-นามสกุล"
                         value={leadName}
                         onChange={(e) => setLeadName(e.target.value)}
                       />
                     </label>
-
-                    <label className="form-field">
-                      <span className="field-label">เบอร์โทรศัพท์</span>
+                    <label>
+                      <span>เบอร์โทรศัพท์ *</span>
                       <input
                         type="tel"
                         required
@@ -302,32 +550,29 @@ export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
                         onChange={(e) => setLeadPhone(e.target.value)}
                       />
                     </label>
-
-                    <label className="form-field">
-                      <span className="field-label">
-                        LINE ID <small className="optional-tag">(ไม่บังคับ)</small>
-                      </span>
+                    <label>
+                      <span>LINE ID</span>
                       <input
                         type="text"
-                        placeholder="LINE ID"
+                        placeholder="เช่น line_id (ถ้ามี)"
                         value={leadLine}
                         onChange={(e) => setLeadLine(e.target.value)}
                       />
                     </label>
-
-                    <label className="form-field">
-                      <span className="field-label">เวลาที่สะดวกให้ติดต่อ</span>
+                    <label>
+                      <span>ช่วงเวลาที่สะดวกให้ติดต่อกลับ</span>
                       <select
                         value={leadContactTime}
                         onChange={(e) => setLeadContactTime(e.target.value)}
                       >
-                        <option value="13:00–16:00 น.">13:00–16:00 น.</option>
-                        <option value="09:00–12:00 น.">09:00–12:00 น.</option>
-                        <option value="17:00–20:00 น.">17:00–20:00 น.</option>
+                        <option>09:00–12:00 น.</option>
+                        <option>13:00–16:00 น.</option>
+                        <option>16:00–19:00 น.</option>
+                        <option>สะดวกตลอดวัน</option>
                       </select>
                     </label>
 
-                    <label className="privacy-checkbox">
+                    <label className="check">
                       <input
                         type="checkbox"
                         checked={leadPrivacyAccepted}
@@ -336,38 +581,124 @@ export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
                       <span>ยอมรับนโยบายความเป็นส่วนตัว</span>
                     </label>
 
-                    <button type="submit" disabled={submitting} className="orange-submit-btn">
-                      {submitting ? 'กำลังส่งข้อมูล...' : 'ขอให้ติดต่อกลับ →'}
+                    <button
+                      type="submit"
+                      className="button full"
+                      disabled={submitting}
+                    >
+                      {submitting ? 'กำลังส่ง...' : 'ส่งข้อมูลติดต่อ →'}
                     </button>
                   </form>
                 </div>
               )}
             </div>
 
-            {/* Direct Contact Box */}
+            {/* Direct Contact Options */}
             <div className="direct-contact-card">
-              <h4 className="contact-card-title">ต้องการติดต่อทีมงานโดยตรง?</h4>
-              <p className="contact-card-sub">โทรหาเรา หรือแชทผ่าน LINE ได้ทันที</p>
-              <div className="contact-buttons-grid">
-                <a href="tel:0980064452" className="contact-tile phone-tile">
-                  <span className="contact-tile-icon">☎</span>
-                  <div className="contact-tile-text">
+              <div>
+                <strong>สอบถามโดยตรงกับผู้ดูแล</strong>
+                <small>ประสานงานและตอบคำถามอย่างรวดเร็ว</small>
+              </div>
+              <div className="direct-contact-actions">
+                <a href="tel:0823456789" className="phone-contact">
+                  <span>📞</span>
+                  <div>
                     <small>โทรสอบถาม</small>
-                    <strong>098-006-4452</strong>
+                    <strong>082-345-6789</strong>
                   </div>
                 </a>
-                <a href="https://line.me" target="_blank" rel="noreferrer" className="contact-tile line-tile">
-                  <span className="contact-tile-icon line-icon">LINE</span>
-                  <div className="contact-tile-text">
-                    <small>สอบถามผ่าน</small>
-                    <strong>แชท LINE</strong>
+                <a href="https://line.me" target="_blank" rel="noreferrer" className="line-contact">
+                  <span>💬</span>
+                  <div>
+                    <small>สอบถามทาง LINE</small>
+                    <strong>@clubrod</strong>
                   </div>
                 </a>
               </div>
             </div>
+
+            {agentObj && (
+              <small className="attribution-note">
+                อ้างอิงรหัสนายหน้า: {agentObj.code} ({agentObj.name})
+              </small>
+            )}
           </div>
         </div>
       </div>
+
+      {/* FULLSCREEN LIGHTBOX ZOOM MODAL */}
+      {isZoomOpen && (
+        <div className="lightbox-zoom-modal" onClick={() => setIsZoomOpen(false)}>
+          <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+            {/* Top Toolbar */}
+            <div className="lightbox-toolbar">
+              <div className="lightbox-title-info">
+                <strong>{car.title}</strong>
+                <span>รูปที่ {activeImgIndex + 1} จาก {images.length}</span>
+              </div>
+              <div className="lightbox-actions">
+                <button type="button" onClick={handleZoomIn} title="ขยายรูป">
+                  🔍+
+                </button>
+                <button type="button" onClick={handleZoomOut} title="ย่อรูป">
+                  🔍-
+                </button>
+                <button type="button" onClick={() => setZoomScale(1)} title="ขนาดปกติ">
+                  ⛶
+                </button>
+                <button
+                  type="button"
+                  className="lightbox-close-btn"
+                  onClick={() => setIsZoomOpen(false)}
+                  title="ปิดหน้าต่าง (Esc)"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Main Zoom Stage */}
+            <div className="lightbox-image-stage">
+              <div className="lightbox-watermark-overlay">
+                <span>CLUBROD</span>
+              </div>
+              <img
+                src={currentImg}
+                alt={`${car.title} ขยายรูปขนาดใหญ่`}
+                style={{ transform: `scale(${zoomScale})` }}
+              />
+            </div>
+
+            {/* Navigation Arrows */}
+            {images.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  className="lightbox-arrow lightbox-arrow-left"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePrevImage();
+                  }}
+                  title="รูปก่อนหน้า (<-)"
+                >
+                  ❮
+                </button>
+                <button
+                  type="button"
+                  className="lightbox-arrow lightbox-arrow-right"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNextImage();
+                  }}
+                  title="รูปถัดไป (->)"
+                >
+                  ❯
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

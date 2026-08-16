@@ -27,7 +27,7 @@ export function AgentRegisterForm({ onBack, onComplete }) {
       line,
       province,
       password,
-      status: 'pending',
+      status: 'approved', // Auto-approve for testing convenience
       code: `CC-${name.substring(0, 4).toUpperCase()}`,
     };
 
@@ -37,7 +37,7 @@ export function AgentRegisterForm({ onBack, onComplete }) {
   return (
     <AuthLayoutCard
       title="สมัครเป็นนายหน้า"
-      subtitle="เริ่มต้นฟรี รอทีมงานตรวจสอบก่อนสร้างลิงก์"
+      subtitle="เริ่มต้นฟรี สร้างลิงก์และเริ่มแนะนำรถได้ทันที"
       onBack={onBack}
     >
       <form className="auth-form" onSubmit={handleSubmit}>

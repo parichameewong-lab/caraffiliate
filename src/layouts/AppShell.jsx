@@ -4,6 +4,7 @@ import Logo from '../components/common/Logo';
 export function AppShell({ role, name, tabs, activeTab, onTab, onLogout, children }) {
   return (
     <div className="app-shell">
+      {/* Desktop Sidebar */}
       <aside className="sidebar">
         <Logo />
         <div className="role-chip">{role}</div>
@@ -11,26 +12,55 @@ export function AppShell({ role, name, tabs, activeTab, onTab, onLogout, childre
           {tabs.map((item) => (
             <button
               key={item.id}
-              className={`nav-item ${item.id === activeTab ? 'active' : ''}`}
+              className={activeTab === item.id ? 'active' : ''}
               onClick={() => onTab(item.id)}
             >
-              <span className="icon">{item.icon}</span>
-              <span>{item.label}</span>
+              <span>{item.icon}</span>
+              {item.label}
             </button>
           ))}
         </nav>
-        <button className="logout-button" onClick={onLogout}>
-          ← ออกจากระบบ
-        </button>
-      </aside>
-      <main className="main-content">
-        <header className="top-bar">
+        <div className="sidebar-user">
+          <div className="user-avatar">{name ? name[0] : 'U'}</div>
           <div>
-            <strong>ยินดีต้อนรับ, {name}</strong>
+            <strong>{name}</strong>
+            <small>ดูโปรไฟล์</small>
           </div>
+          <button type="button" onClick={onLogout} title="ออกจากระบบ">
+            ↪
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Workspace */}
+      <div className="app-main">
+        <header className="app-header">
+          <Logo compact />
+          <div>
+            <span className="status-dot" /> ระบบต้นแบบ
+          </div>
+          <button type="button" onClick={onLogout}>
+            ออกจากระบบ
+          </button>
         </header>
-        <div className="content-container">{children}</div>
-      </main>
+
+        {children}
+      </div>
+
+      {/* Mobile Fixed Bottom Navigation Bar */}
+      <nav className="bottom-nav">
+        {tabs.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            className={activeTab === item.id ? 'active' : ''}
+            onClick={() => onTab(item.id)}
+          >
+            <span>{item.icon}</span>
+            <small>{item.label}</small>
+          </button>
+        ))}
+      </nav>
     </div>
   );
 }
