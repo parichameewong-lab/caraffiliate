@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { formatNumber, getCarImages, generateId } from '../../utils/formatters';
 import { createConversation } from '../../services/api';
+import CarLoanCalculator from './CarLoanCalculator';
 
 export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
   const [submitting, setSubmitting] = useState(false);
@@ -60,6 +61,17 @@ export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
 
   const handleQuickQuestionClick = (qText) => {
     setChatMsg(qText);
+  };
+
+  const handleApplyLoanPlan = (plan) => {
+    setActiveTab('chat');
+    setChatMsg(
+      `สนใจจัดไฟแนนซ์รถ ${car.title}: เงินดาวน์ ฿${formatNumber(plan.downPayment)} (${plan.downPercent}%), ผ่อน ${plan.tenureMonths} งวด (ตกเดือนละ ฿${formatNumber(plan.monthlyPayment)} / ดอกเบี้ย ${plan.interestRate}%)`
+    );
+    const contactCol = document.querySelector('.customer-contact-column');
+    if (contactCol) {
+      contactCol.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   const handleNextImage = () => {
@@ -409,6 +421,9 @@ export function CarDetailModal({ car, agents, attribution, onBack, onLead }) {
                 )}
               </div>
             </div>
+
+            {/* Minimal Car Loan Installment Calculator (ล่างสุด) */}
+            <CarLoanCalculator car={car} />
           </div>
 
           {/* Right Column - Contact Form Box */}
